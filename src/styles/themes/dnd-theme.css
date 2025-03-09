@@ -98,6 +98,7 @@ body.dnd-theme h6 {
   font-family: var(--font-display);
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
   letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
 }
 
 .dark .dnd-heading {
@@ -105,22 +106,35 @@ body.dnd-theme h6 {
 }
 
 .dnd-card {
-  background-color: hsl(var(--card));
-  border: 1px solid;
-  border-radius: 0.125rem;
+  background-color: #fbf8f1;
+  border: 1px solid #8b6b3e;
+  border-radius: 0.375rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   overflow: hidden;
   background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.03' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.09'/%3E%3C/svg%3E");
+  position: relative;
+}
+
+.dnd-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(224, 213, 192, 0.1));
+  pointer-events: none;
 }
 
 .dnd-input {
   background-color: hsl(var(--input));
   border: 1px solid hsl(var(--input));
-  border-radius: 0.125rem;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
+  border-radius: 0.25rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
   font-family: var(--font-body);
   background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.07'/%3E%3C/svg%3E");
+  margin-bottom: 1rem;
 }
 
 .dnd-button {
@@ -134,6 +148,8 @@ body.dnd-theme h6 {
   letter-spacing: 0.05em;
   transition: all 0.2s ease-in-out;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  padding: 12px 24px;
+  margin: 0.5rem;
 }
 
 .dnd-button:hover {
@@ -144,22 +160,29 @@ body.dnd-theme h6 {
 
 .dnd-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 1.5rem;
 }
 
 .dnd-table th {
-  background-color: hsl(var(--muted));
-  padding: 0.5rem;
+  background-color: #e0d5c0;
+  color: #6d1a12;
+  padding: 0.75rem 1rem;
   text-align: left;
-  font-weight: 600;
-  border-bottom: 1px solid hsl(var(--border));
+  font-weight: 700;
+  border-bottom: 2px solid #8b6b3e;
   font-family: var(--font-display);
 }
 
 .dnd-table td {
-  padding: 0.5rem;
-  border-bottom: 1px solid hsl(var(--border));
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #d5c7a9;
   font-family: var(--font-body);
+}
+
+.dnd-table tr:hover td {
+  background-color: rgba(224, 213, 192, 0.2);
 }
 
 .dnd-stats {
@@ -179,10 +202,16 @@ body.dnd-theme h6 {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem;
+  padding: 1rem;
   border: 1px solid;
-  border-radius: 0.125rem;
+  border-radius: 0.25rem;
   background-color: hsl(var(--card));
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+}
+
+.dnd-stat-box:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .dnd-stat-label {
@@ -214,4 +243,36 @@ body.dnd-theme h6 {
 .dnd-button span, 
 .dnd-button div {
   /* no forzar ningún color */
+}
+
+/* Asegurar que las etiquetas tengan buen espaciado */
+label {
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Estilos para las pestañas de navegación */
+[role="tablist"] {
+  border-bottom: 2px solid #8b6b3e;
+  padding-bottom: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+[role="tab"] {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  transition: all 0.2s ease-in-out;
+}
+
+[role="tab"][data-state="active"] {
+  background-color: #8b6b3e;
+  color: white;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos para los contenedores de contenido */
+[role="tabpanel"] {
+  transition: all 0.3s ease-in-out;
+  min-height: 500px; /* Altura mínima para prevenir saltos bruscos entre pestañas */
 } 
