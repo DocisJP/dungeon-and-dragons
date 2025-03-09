@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
 export default function Auth() {
@@ -7,15 +7,52 @@ export default function Auth() {
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
   const [isLogin, setIsLogin] = useState(true)
+  
+  // Verificar si hay problemas de sesión al cargar
+  useEffect(() => {
+    const checkExistingSession = async () => {
+      try {
+        console.log("Auth: Verificando sesión existente...");
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Auth: Error al verificar sesión existente:", error);
+          setMessage("Error al verificar sesión: " + error.message);
+        } else if (data?.session) {
+          console.log("Auth: Hay una sesión existente, pero no está activa en la app");
+        }
+      } catch (err) {
+        console.error("Auth: Error inesperado al verificar sesión:", err);
+      }
+    };
+    
+    checkExistingSession();
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault()
     try {
+      setMessage('');
       setLoading(true)
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) throw error
+      console.log("Auth: Intentando iniciar sesión con email:", email);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password,
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+      
+      if (error) {
+        console.error("Auth: Error de inicio de sesión:", error);
+        throw error;
+      }
+      
+      console.log("Auth: Inicio de sesión exitoso:", data?.user?.id);
     } catch (error) {
-      setMessage(error.error_description || error.message)
+      console.error("Auth: Error completo de inicio de sesión:", error);
+      setMessage(error.error_description || error.message || "Error al iniciar sesión");
     } finally {
       setLoading(false)
     }
@@ -24,16 +61,64 @@ export default function Auth() {
   const handleSignUp = async (e) => {
     e.preventDefault()
     try {
+      setMessage('');
       setLoading(true)
-      const { error } = await supabase.auth.signUp({ email, password })
-      if (error) throw error
-      setMessage('Revisa tu email para confirmar tu cuenta')
+      console.log("Auth: Intentando registrar nuevo usuario con email:", email);
+      
+      const { data, error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          emailRedirectTo: window.location.origin
+        }
+      });
+      
+      if (error) {
+        console.error("Auth: Error de registro:", error);
+        throw error;
+      }
+      
+      if (data?.user?.identities?.length === 0) {
+        setMessage('Este email ya está registrado. Por favor, inicia sesión.');
+      } else {
+        setMessage('Revisa tu email para confirmar tu cuenta');
+        console.log("Auth: Registro exitoso, verificación enviada");
+      }
     } catch (error) {
-      setMessage(error.error_description || error.message)
+      console.error("Auth: Error completo de registro:", error);
+      setMessage(error.error_description || error.message || "Error al registrarse");
     } finally {
       setLoading(false)
     }
   }
+
+  // Función para probar la conexión a Supabase
+  const testConnection = async () => {
+    setMessage("Probando conexión a Supabase...");
+    setLoading(true);
+    
+    try {
+      // Intentar una operación básica de Supabase
+      const startTime = Date.now();
+      const { data, error } = await supabase.from('characters').select('count').limit(1);
+      const endTime = Date.now();
+      
+      if (error) {
+        if (error.code === 'PGRST301') {
+          // Este error es normal si no hay permisos, pero indica que Supabase responde
+          setMessage(`✅ Conexión establecida en ${endTime - startTime}ms. Error de permisos normal.`);
+        } else {
+          setMessage(`❌ Error de conexión: ${error.message}`);
+        }
+      } else {
+        setMessage(`✅ Conexión establecida en ${endTime - startTime}ms. Base de datos responde correctamente.`);
+      }
+    } catch (err) {
+      setMessage(`❌ Error inesperado: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900">
@@ -150,6 +235,24 @@ export default function Auth() {
           <div className="mt-4 text-center text-xs text-amber-900">
             Aplicación no oficial de hojas de personaje para D&D
           </div>
+
+          {/* Botón para probar la conexión */}
+          <div className="mt-6">
+            <button
+              onClick={testConnection}
+              disabled={loading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              {loading ? "Probando..." : "Probar conexión a Supabase"}
+            </button>
+          </div>
+          
+          {/* Mensaje de error o éxito */}
+          {message && (
+            <div className={`mt-4 p-3 rounded ${message.includes('✅') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+              {message}
+            </div>
+          )}
         </div>
       </div>
     </div>

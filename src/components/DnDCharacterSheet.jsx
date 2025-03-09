@@ -8,10 +8,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 
 const DnDCharacterSheet = ({ 
   characterId, 
   onCharacterSaved,
+  onDelete,
   initialData = {
     attributes: {
       strength: 10,
@@ -21,19 +23,54 @@ const DnDCharacterSheet = ({
       wisdom: 10,
       charisma: 10
     },
-    info: {
+    characterInfo: {
       name: '',
       class: '',
       level: 1,
       race: '',
       background: '',
-      alignment: ''
-    }
+      alignment: '',
+      hp: 10,
+      maxHp: 10,
+      ac: 10,
+      speed: 30,
+      initiative: 0
+    },
+    weapons: [],
+    items: []
   } 
 }) => {
   const [activeTab, setActiveTab] = useState("info");
-  const [attributes, setAttributes] = useState(initialData.attributes);
-  const [characterInfo, setCharacterInfo] = useState(initialData.info);
+  const [attributes, setAttributes] = useState(initialData.attributes || {
+    strength: 10,
+    dexterity: 10,
+    constitution: 10, 
+    intelligence: 10,
+    wisdom: 10,
+    charisma: 10
+  });
+  
+  // Asegurarse de que usamos la estructura correcta para la información del personaje
+  // Compatibilidad con versiones antiguas que usaban info en lugar de characterInfo
+  const [characterInfo, setCharacterInfo] = useState(initialData.characterInfo || initialData.info || {
+    name: '',
+    class: '',
+    level: 1,
+    race: '',
+    background: '',
+    alignment: '',
+    hp: 10,
+    maxHp: 10,
+    ac: 10,
+    speed: 30,
+    initiative: 0
+  });
+  
+  const [weapons, setWeapons] = useState(initialData.weapons || []);
+  const [items, setItems] = useState(initialData.items || []);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
 
   // Función para calcular el modificador basado en el valor del atributo
   const getModifier = (value) => {
@@ -59,15 +96,44 @@ const DnDCharacterSheet = ({
     }));
   };
 
-  const saveCharacter = () => {
-    const characterData = {
-      id: characterId,
-      attributes,
-      info: characterInfo,
-    };
+  // Función para guardar el personaje
+  const saveCharacter = async () => {
+    setIsSaving(true);
     
-    console.log('Saving character:', characterData);
-    onCharacterSaved && onCharacterSaved(characterData);
+    try {
+      const characterData = {
+        id: characterId,
+        attributes,
+        characterInfo,  // Usar la estructura correcta
+        weapons,
+        items
+      };
+      
+      console.log('Saving character:', characterData);
+      await onCharacterSaved(characterData);
+      setShowSaveConfirmation(true);
+      
+      // Ocultar el mensaje después de 3 segundos
+      setTimeout(() => {
+        setShowSaveConfirmation(false);
+      }, 3000);
+    } catch (error) {
+      console.error("Error al guardar personaje:", error);
+      alert("Error al guardar el personaje: " + (error.message || "Desconocido"));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  // Función para confirmar la eliminación
+  const handleDelete = () => {
+    setShowDeleteDialog(true);
+  };
+  
+  // Función para confirmar la eliminación
+  const confirmDelete = () => {
+    setShowDeleteDialog(false);
+    onDelete && onDelete(characterId);
   };
 
   // Estilo común para cada sección de contenido para mantener consistencia
@@ -357,16 +423,63 @@ const DnDCharacterSheet = ({
             </TabsContent>
           </Tabs>
           
-          <div className="mt-8 text-center">
+          <div className="mt-8 text-center flex justify-center gap-4">
             <Button 
               onClick={saveCharacter} 
               className="dnd-button px-10 py-3 text-lg"
+              disabled={isSaving}
             >
-              Guardar Personaje
+              {isSaving ? "Guardando..." : "Guardar Personaje"}
             </Button>
+            
+            {onDelete && (
+              <Button 
+                onClick={handleDelete} 
+                className="dnd-button px-10 py-3 text-lg bg-red-600 hover:bg-red-700"
+                variant="destructive"
+              >
+                Eliminar Personaje
+              </Button>
+            )}
           </div>
         </div>
       </Card>
+
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>¿Estás seguro?</DialogTitle>
+            <DialogDescription>Esta acción eliminará permanentemente el personaje y no se puede deshacer.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex justify-between space-x-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowDeleteDialog(false)}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDelete}
+            >
+              Eliminar Personaje
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {showSaveConfirmation && (
+        <div className="fixed top-4 right-4 z-50 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded shadow-md">
+          <p>¡Personaje guardado exitosamente!</p>
+          <button 
+            onClick={() => setShowSaveConfirmation(false)}
+            className="absolute top-1 right-1 text-green-500 hover:text-green-700"
+            aria-label="Cerrar"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 };

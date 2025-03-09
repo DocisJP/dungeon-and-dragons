@@ -7,6 +7,16 @@ export default function CharacterList({
   onDelete, 
   useNewUI = false
 }) {
+  // Función de ayuda para mostrar los detalles del personaje de manera segura
+  const getCharacterDetails = (character) => {
+    const characterInfo = character.character_data?.characterInfo || {};
+    return {
+      race: characterInfo.race || '',
+      class: characterInfo.class || '',
+      level: characterInfo.level || ''
+    };
+  };
+
   return (
     <div>
       {characters.length === 0 ? (
@@ -31,51 +41,55 @@ export default function CharacterList({
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {characters.map(character => (
-            <div 
-              key={character.id}
-              className={`
-                p-4 rounded relative transition 
-                ${useNewUI 
-                  ? 'dnd-card cursor-pointer hover:shadow-lg group' 
-                  : 'bg-white shadow hover:shadow-md'
-                }
-              `}
-              onClick={() => onSelect(character)}
-            >
-              <div>
-                <h2 className={`text-xl font-semibold ${useNewUI ? 'dnd-heading mb-2' : ''}`}>
-                  {character.name || 'Personaje sin nombre'}
-                </h2>
-                <div className={`text-sm ${useNewUI ? 'text-accent-foreground/80' : 'text-gray-500'}`}>
-                  <p>
-                    {character.race} {character.class} {character.level && `Nivel ${character.level}`}
-                  </p>
-                  <p className="mt-1">
-                    Actualizado: {new Date(character.updated_at).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const confirmDelete = window.confirm('¿Estás seguro de que quieres eliminar este personaje?');
-                  if (confirmDelete) {
-                    onDelete(character.id);
-                  }
-                }}
+          {characters.map(character => {
+            const details = getCharacterDetails(character);
+            
+            return (
+              <div 
+                key={character.id}
                 className={`
-                  absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full 
+                  p-4 rounded relative transition 
                   ${useNewUI 
-                    ? 'opacity-0 group-hover:opacity-100 bg-destructive text-white transition-opacity' 
-                    : 'text-red-500 hover:text-red-700'
+                    ? 'dnd-card cursor-pointer hover:shadow-lg group' 
+                    : 'bg-white shadow hover:shadow-md'
                   }
                 `}
+                onClick={() => onSelect(character)}
               >
-                ✕
-              </button>
-            </div>
-          ))}
+                <div>
+                  <h2 className={`text-xl font-semibold ${useNewUI ? 'dnd-heading mb-2' : ''}`}>
+                    {character.name || 'Personaje sin nombre'}
+                  </h2>
+                  <div className={`text-sm ${useNewUI ? 'text-accent-foreground/80' : 'text-gray-500'}`}>
+                    <p>
+                      {details.race && details.race} {details.class && details.class} {details.level && `Nivel ${details.level}`}
+                    </p>
+                    <p className="mt-1">
+                      Actualizado: {new Date(character.updated_at).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const confirmDelete = window.confirm('¿Estás seguro de que quieres eliminar este personaje?');
+                    if (confirmDelete) {
+                      onDelete(character.id);
+                    }
+                  }}
+                  className={`
+                    absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full 
+                    ${useNewUI 
+                      ? 'opacity-0 group-hover:opacity-100 bg-destructive text-white transition-opacity' 
+                      : 'text-red-500 hover:text-red-700'
+                    }
+                  `}
+                >
+                  ✕
+                </button>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
