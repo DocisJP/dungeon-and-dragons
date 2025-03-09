@@ -426,7 +426,8 @@ const DnDCharacterSheet = ({
           <div className="mt-8 text-center flex justify-center gap-4">
             <Button 
               onClick={saveCharacter} 
-              className="dnd-button px-10 py-3 text-lg"
+              className="dnd-button px-10 py-3 text-lg text-white bg-green-600 hover:bg-green-700 focus-visible:ring-green-400/20"
+              variant="default"
               disabled={isSaving}
             >
               {isSaving ? "Guardando..." : "Guardar Personaje"}
@@ -435,7 +436,7 @@ const DnDCharacterSheet = ({
             {onDelete && (
               <Button 
                 onClick={handleDelete} 
-                className="dnd-button px-10 py-3 text-lg bg-red-600 hover:bg-red-700"
+                className="dnd-button px-10 py-3 text-lg text-white bg-red-600 hover:bg-red-700"
                 variant="destructive"
               >
                 Eliminar Personaje
