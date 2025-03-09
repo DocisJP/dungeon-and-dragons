@@ -24,5 +24,8 @@ dist-ssr
 *.sw?
 
 .env
-.plan.md 
+plan.md 
 .cursorrules/*
+.cursor/rules/*
+.cursor/*
+.cursor/rules/

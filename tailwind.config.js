@@ -5,7 +5,9 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      // Eliminamos las configuraciones de fuentes personalizadas para evitar conflictos
+    },
   },
   plugins: [],
 } 

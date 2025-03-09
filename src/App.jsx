@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabaseClient';
 import CharacterSheet from './components/CharacterSheet';
+import DnDCharacterSheet from './components/DnDCharacterSheet';
 import Auth from './components/Auth';
 import CharacterList from './components/CharacterList';
 import Layout from './components/Layout';
@@ -11,6 +12,16 @@ function App() {
   const [characters, setCharacters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCharacter, setSelectedCharacter] = useState(null);
+  const [useNewUI, setUseNewUI] = useState(true);
+
+  // Aplicar la clase dnd-theme al body cuando useNewUI es verdadero
+  useEffect(() => {
+    if (useNewUI) {
+      document.body.classList.add('dnd-theme');
+    } else {
+      document.body.classList.remove('dnd-theme');
+    }
+  }, [useNewUI]);
 
   // Verificar autenticación al cargar
   useEffect(() => {
@@ -165,45 +176,200 @@ function App() {
     await supabase.auth.signOut();
   };
 
-  // Si está cargando, mostrar spinner
+  // Guardar los cambios en un personaje
+  const handleSaveCharacter = async (characterData) => {
+    try {
+      // Verificar si hay un usuario autenticado
+      if (!session || !session.user) {
+        throw new Error("No hay sesión de usuario activa. Por favor, inicia sesión nuevamente.");
+      }
+      
+      const { error } = await supabase
+        .from('characters')
+        .update({ 
+          name: characterData.info.name,
+          character_data: characterData
+        })
+        .eq('id', characterData.id);
+      
+      if (error) {
+        console.error('Error al guardar personaje:', error);
+        alert(`Error al guardar el personaje: ${error.message}`);
+        throw error;
+      }
+      
+      alert('Personaje guardado correctamente');
+      await fetchCharacters(); // Recargar la lista
+    } catch (error) {
+      console.error('Error completo al guardar personaje:', error);
+      alert(`Error al guardar el personaje: ${error.message || 'Desconocido'}`);
+    }
+  };
+
+  // Función para alternar entre la UI antigua y la nueva
+  const toggleUI = () => {
+    console.log("Alternando UI de", useNewUI, "a", !useNewUI);
+    // Usamos el callback para garantizar que estemos trabajando con el valor más reciente
+    setUseNewUI(prev => {
+      const newValue = !prev;
+      console.log("Nuevo valor:", newValue);
+      return newValue;
+    });
+  };
+
+  // Renderizar la aplicación
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p>Cargando...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg">Cargando...</p>
       </div>
     );
   }
 
-  // Si el usuario no está autenticado, mostrar pantalla de login
   if (!session) {
     return <Auth />;
   }
 
-  // Mostrar lista de personajes o el personaje seleccionado
   return (
     <Layout 
-      showBackButton={!!selectedCharacter} 
-      onBack={() => setSelectedCharacter(null)}
+      onBack={() => setSelectedCharacter(null)} 
+      showBackButton={!!selectedCharacter}
+      useNewUI={useNewUI}
     >
       {selectedCharacter ? (
-        <CharacterSheet 
-          characterId={selectedCharacter} 
-          onCharacterSaved={(id) => {
-            fetchCharacters();
-            setSelectedCharacter(id);
-          }}
-        />
+        <>
+          <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm mb-4">
+            <div className="flex justify-between items-center">
+              <h2 className={`text-xl font-bold ${useNewUI ? 'dnd-heading' : ''}`}>
+                {selectedCharacter.name || 'Personaje sin nombre'}
+              </h2>
+              <button 
+                onClick={toggleUI}
+                className={`px-4 py-2 rounded transition-colors ${
+                  useNewUI 
+                    ? 'bg-gray-600 text-white hover:bg-gray-700' 
+                    : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
+              >
+                {useNewUI ? 'UI Clásica' : 'UI Mejorada D&D'}
+              </button>
+            </div>
+          </div>
+          
+          {useNewUI ? (
+            <DnDCharacterSheet 
+              characterId={selectedCharacter}
+              initialData={{
+                attributes: selectedCharacter.character_data?.attributes || {
+                  strength: 10,
+                  dexterity: 10,
+                  constitution: 10,
+                  intelligence: 10,
+                  wisdom: 10,
+                  charisma: 10
+                },
+                info: {
+                  name: selectedCharacter.name || '',
+                  class: selectedCharacter.character_data?.characterInfo?.class || '',
+                  level: selectedCharacter.character_data?.characterInfo?.level || 1,
+                  race: selectedCharacter.character_data?.characterInfo?.race || '',
+                  background: selectedCharacter.character_data?.characterInfo?.background || '',
+                  alignment: selectedCharacter.character_data?.characterInfo?.alignment || ''
+                }
+              }}
+              onCharacterSaved={handleSaveCharacter}
+            />
+          ) : (
+            <CharacterSheet 
+              characterId={selectedCharacter} 
+              onCharacterSaved={handleSaveCharacter} 
+            />
+          )}
+        </>
       ) : (
-        <CharacterList 
-          characters={characters}
-          onSelect={setSelectedCharacter}
-          onDelete={deleteCharacter}
-          onCreate={createNewCharacter}
-          onLogout={handleLogout}
-        />
+        <div className="mx-auto p-4">
+          <div className="bg-gray-800 text-white dark:bg-gray-900 p-4 rounded-lg shadow-md mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+              <h1 className={`text-2xl font-bold text-white ${useNewUI ? 'dnd-heading' : ''}`}>
+                Tus Personajes de D&D
+              </h1>
+              <div className="flex flex-wrap gap-2">
+                <button 
+                  onClick={toggleUI}
+                  className={`px-4 py-2 rounded transition-colors ${
+                    useNewUI 
+                      ? 'bg-gray-600 text-white hover:bg-gray-700' 
+                      : 'bg-blue-500 text-white hover:bg-blue-600'
+                  }`}
+                >
+                  {useNewUI ? 'UI Clásica' : 'UI Mejorada D&D'}
+                </button>
+                <button 
+                  onClick={handleLogout}
+                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                >
+                  Cerrar Sesión
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {characters.length === 0 ? (
+            // Cuando no hay personajes, mostrar un botón grande y destacado
+            <div className="flex flex-col items-center justify-center py-8">
+              <button 
+                onClick={createNewCharacter}
+                className={`
+                  px-8 py-4 rounded-lg text-xl font-bold mb-6
+                  ${useNewUI 
+                    ? 'dnd-button'
+                    : 'bg-green-500 text-white hover:bg-green-600 shadow-xl'
+                  }
+                `}
+              >
+                + Crear Nuevo Personaje
+              </button>
+              <div className={`bg-white shadow-md rounded-lg p-6 w-full ${useNewUI ? 'dnd-card dnd-border' : ''}`}>
+                <CharacterList 
+                  characters={characters} 
+                  onSelect={setSelectedCharacter} 
+                  onDelete={deleteCharacter} 
+                  useNewUI={useNewUI}
+                />
+              </div>
+            </div>
+          ) : (
+            // Cuando hay personajes, mostrar el diseño normal
+            <div>
+              <div className="mb-6 flex justify-center">
+                <button 
+                  onClick={createNewCharacter}
+                  className={`
+                    px-6 py-3 rounded-lg text-xl font-bold 
+                    ${useNewUI 
+                      ? 'dnd-button'
+                      : 'bg-green-500 text-white hover:bg-green-600 shadow-lg'
+                    }
+                  `}
+                >
+                  + Crear Nuevo Personaje
+                </button>
+              </div>
+              
+              <div className={`bg-white shadow-md rounded-lg p-6 ${useNewUI ? 'dnd-card dnd-border' : ''}`}>
+                <CharacterList 
+                  characters={characters} 
+                  onSelect={setSelectedCharacter} 
+                  onDelete={deleteCharacter} 
+                  useNewUI={useNewUI}
+                />
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </Layout>
   );
 }
 
-export default App
+export default App;

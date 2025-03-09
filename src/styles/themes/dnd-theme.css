@@ -1,0 +1,217 @@
+/* Variables de tema D&D - Estas se aplicarán después de las directivas Tailwind */
+:root {
+  /* Base colors for the D&D theme */
+  --background: 36 33% 97%; /* Light parchment background */
+  --foreground: 24 10% 10%; /* Dark brown text */
+  
+  /* Card and UI elements */
+  --card: 35 25% 94%; /* Slightly darker parchment for cards */
+  --card-foreground: 24 10% 10%;
+  
+  /* Primary action colors - deep red for D&D */
+  --primary: 0 70% 35%; /* Deep red - classic D&D color */
+  --primary-foreground: 0 0% 98%;
+  
+  /* Secondary action colors - medieval gold */
+  --secondary: 36 40% 40%; /* Gold/brass accent */
+  --secondary-foreground: 0 0% 98%;
+  
+  /* Muted elements */
+  --muted: 30 10% 92%;
+  --muted-foreground: 24 5% 40%;
+  
+  /* Accents */
+  --accent: 28 50% 40%; /* Warm brown accent */
+  --accent-foreground: 0 0% 98%;
+  
+  /* Destructive elements */
+  --destructive: 0 85% 30%;
+  --destructive-foreground: 0 0% 98%;
+  
+  /* UI elements */
+  --border: 30 15% 85%;
+  --input: 30 10% 90%;
+  --ring: 35 50% 30%;
+  
+  /* Radius for more medieval feel - less rounded */
+  --radius: 0.3rem;
+  
+  /* Fuentes para D&D */
+  --font-medieval: 'MedievalSharp', cursive;
+  --font-display: 'Cinzel', serif;
+  --font-body: 'Lora', serif;
+}
+
+/* Dark mode with a more medieval dungeon feel */
+.dark {
+  --background: 24 30% 10%; /* Dark stone/dungeon background */
+  --foreground: 40 15% 90%; /* Light parchment text */
+  
+  --card: 30 20% 15%; /* Darker stone for cards */
+  --card-foreground: 40 15% 90%;
+  
+  --primary: 0 60% 35%; /* Deep blood red */
+  --primary-foreground: 0 0% 98%;
+  
+  --secondary: 36 30% 25%; /* Dark gold/brass */
+  --secondary-foreground: 0 0% 98%;
+  
+  --muted: 24 10% 20%;
+  --muted-foreground: 40 10% 75%;
+  
+  --accent: 28 40% 20%; /* Dark leather brown */
+  --accent-foreground: 0 0% 98%;
+  
+  --destructive: 0 70% 25%;
+  --destructive-foreground: 0 0% 98%;
+  
+  --border: 30 15% 25%;
+  --input: 30 10% 20%;
+  --ring: 35 50% 30%;
+}
+
+/* Apply medieval fonts to the body when using the D&D theme */
+body.dnd-theme {
+  font-family: var(--font-body);
+}
+
+/* Apply medieval fonts to headings when using the D&D theme */
+body.dnd-theme h1, 
+body.dnd-theme h2, 
+body.dnd-theme h3, 
+body.dnd-theme h4, 
+body.dnd-theme h5, 
+body.dnd-theme h6 {
+  font-family: var(--font-display);
+}
+
+/* Decorative elements for D&D theme */
+.dnd-border {
+  border: 2px solid #8b6b3e;
+  position: relative;
+  border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='75' height='75'%3E%3Cg fill='none' stroke='%23876b3d' stroke-width='2'%3E%3Cpath d='M20,2 L2,2 L2,20 M55,2 L73,2 L73,20 M2,55 L2,73 L20,73 M73,55 L73,73 L55,73'/%3E%3C/g%3E%3C/svg%3E") 25;
+}
+
+.dnd-heading {
+  font-weight: bold;
+  color: #6d1a12;
+  font-family: var(--font-display);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.05em;
+}
+
+.dark .dnd-heading {
+  color: #b8a88a;
+}
+
+.dnd-card {
+  background-color: hsl(var(--card));
+  border: 1px solid;
+  border-radius: 0.125rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.03' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.09'/%3E%3C/svg%3E");
+}
+
+.dnd-input {
+  background-color: hsl(var(--input));
+  border: 1px solid hsl(var(--input));
+  border-radius: 0.125rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.07'/%3E%3C/svg%3E");
+}
+
+.dnd-button {
+  background-color: #e0d5c0; /* Color pergamino claro */
+  color: #222 !important; /* Texto oscuro para mejor contraste */
+  font-weight: 700; /* Negrita para mejor legibilidad */
+  border-radius: 0.25rem;
+  font-family: var(--font-display);
+  border: 1px solid #8b6b3e; /* Borde más visible */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dnd-button:hover {
+  background-color: #d5c7a9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dnd-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dnd-table th {
+  background-color: hsl(var(--muted));
+  padding: 0.5rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 1px solid hsl(var(--border));
+  font-family: var(--font-display);
+}
+
+.dnd-table td {
+  padding: 0.5rem;
+  border-bottom: 1px solid hsl(var(--border));
+  font-family: var(--font-body);
+}
+
+.dnd-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .dnd-stats {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.dnd-stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border: 1px solid;
+  border-radius: 0.125rem;
+  background-color: hsl(var(--card));
+}
+
+.dnd-stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: hsl(var(--muted-foreground));
+  font-family: var(--font-display);
+}
+
+.dnd-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: var(--font-medieval);
+}
+
+.dnd-stat-modifier {
+  font-size: 0.875rem;
+  font-family: var(--font-medieval);
+}
+
+/* Eliminar completamente las animaciones y efectos especiales problemáticos */
+.dnd-torchlight {
+  display: inline-block;
+}
+
+/* Eliminar estilos que fuerzan colores problemáticos */
+.dnd-button span, 
+.dnd-button div {
+  /* no forzar ningún color */
+} 
